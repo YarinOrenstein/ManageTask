@@ -1,7 +1,9 @@
 package com.yotpo.managetask.api.converters;
 
 import com.yotpo.managetask.core.entities.Assignee;
+import com.yotpo.managetask.core.services.AssigneeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.RequestEntity;
@@ -14,6 +16,8 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class AssigneeConverter {
+    @Autowired
+    private AssigneeService assigneeService;
 
     public Assignee assigneeFromRequest(RequestEntity<String> request) throws JSONException {
         JSONObject jsonAssigneeObject = new JSONObject(request.getBody());
@@ -21,11 +25,17 @@ public class AssigneeConverter {
     }
 
     public Assignee assigneeFromJSONObject(JSONObject jsonObject) throws JSONException {
-        return Assignee.builder()
-                .assignee_id(jsonObject.getLong("assignee_id"))
-                .first_name(jsonObject.getString("first_name"))
-                .last_name(jsonObject.getString("last_name"))
-                .build();
+        if (jsonObject.has("assignee_id")) {
+            return assigneeService.get(jsonObject.getLong("assignee_id"));
+        }
+        else {
+            Assignee assignee = Assignee.builder()
+                    .first_name(jsonObject.getString("first_name"))
+                    .last_name(jsonObject.getString("last_name"))
+                    .build();
+            assigneeService.create(assignee);
+            return assignee;
+        }
     }
 
     public String toAssigneeResponse(Assignee assignee) {
@@ -34,15 +44,27 @@ public class AssigneeConverter {
                     .put("assignee_id", assignee.getAssignee_id())
                     .put("first_name", assignee.getFirst_name())
                     .put("last_name", assignee.getLast_name())
-                    .put("tasks", assignee.getTasks())
+//                    .put("tasks", assignee.getTasks())
                     .toString();
         } catch (JSONException e){
             e.printStackTrace();
-            return "Issue parsing employee JSON";
+            return "Issue parsing assignee JSON";
         }
     }
 
     public String toAssigneesResponse(List<Assignee> assignees) {
         return assignees.stream().map(this::toAssigneeResponse).collect(Collectors.toList()).toString();
+    }
+
+    public JSONObject JSONObjectFromAssignee(Assignee assignee) {
+        try{
+            return new JSONObject()
+                    .put("assignee_id", assignee.getAssignee_id())
+                    .put("first_name", assignee.getFirst_name())
+                    .put("last_name", assignee.getLast_name());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

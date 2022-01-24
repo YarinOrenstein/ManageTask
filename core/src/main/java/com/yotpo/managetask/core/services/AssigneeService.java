@@ -1,5 +1,6 @@
 package com.yotpo.managetask.core.services;
 
+import com.yotpo.managetask.core.exceptions.AssigneeNotFoundException;
 import com.yotpo.managetask.core.entities.Assignee;
 import com.yotpo.managetask.core.repositories.AssigneeRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,11 @@ public class AssigneeService {
 
     public List<Assignee> getAll() { return (List<Assignee>) assigneeRepository.findAll(); }
 
-//    public Assignee get(Long id) { return assigneeRepository.findById(id); }
+    public Assignee get(Long id) { return assigneeRepository.findById(id)
+            .orElseThrow(() -> new AssigneeNotFoundException(id)); }
 
-//    public void delete(Long id) {
-//        //Also need to check for children records before deleting.
-//        assigneeRepository.deleteById(id);
-//    }
+    public void delete(Long id) {
+        //Also need to check for children records before deleting.
+        assigneeRepository.deleteById(id);
+    }
 }

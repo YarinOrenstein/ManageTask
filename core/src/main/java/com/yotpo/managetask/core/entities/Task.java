@@ -2,6 +2,7 @@ package com.yotpo.managetask.core.entities;
 
 import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity(name = "tasks")
@@ -13,7 +14,7 @@ public class Task {
 
     private String title;
     private String status;
-    private Date due_date;
+    private LocalDate due_date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id")
@@ -22,16 +23,16 @@ public class Task {
     public Task() {
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "task_id=" + task_id +
-                ", title='" + title + '\'' +
-                ", status='" + status + '\'' +
-                ", due_date=" + due_date +
-                ", assignee=" + assignee +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Task{" +
+//                "task_id=" + task_id +
+//                ", title='" + title + '\'' +
+//                ", status='" + status + '\'' +
+//                ", due_date=" + due_date +
+//                ", assignee=" + assignee +
+//                '}';
+//    }
 
     public Long getTask_id() {
         return task_id;
@@ -65,11 +66,9 @@ public class Task {
         this.assignee = assignee;
     }
 
-    public Date getDue_date() {
-        return due_date;
-    }
+    public LocalDate getDue_date() { return due_date; }
 
-    public void setDue_date(Date dueDate) {
+    public void setDue_date(LocalDate dueDate) {
         this.due_date = dueDate;
     }
 }

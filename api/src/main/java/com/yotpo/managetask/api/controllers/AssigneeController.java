@@ -26,8 +26,8 @@ public class AssigneeController {
 
     @PostMapping()
     @RequestMapping("/add")
-    public ResponseEntity<String> create(RequestEntity<String> assineeRequest) throws JSONException {
-        Assignee newAssingee = assigneeService.create(assigneeConverter.assigneeFromRequest(assineeRequest));
+    public ResponseEntity<String> create(RequestEntity<String> assigneeRequest) throws JSONException {
+        Assignee newAssingee = assigneeService.create(assigneeConverter.assigneeFromRequest(assigneeRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(assigneeConverter.toAssigneeResponse(newAssingee));
     }
 
@@ -38,16 +38,17 @@ public class AssigneeController {
         return ResponseEntity.status(HttpStatus.FOUND).body(assigneeConverter.toAssigneesResponse(assignees));
     }
 
-//    @GetMapping()
-//    @RequestMapping("/get/{id}")
-//    public ResponseEntity<String> getAssignee(@PathVariable Long id) {
-//        Assignee assignee = assigneeService.get(id);
-//        return ResponseEntity.status(HttpStatus.FOUND).body(assigneeConverter.toAssigneeResponse(assignee));
-//    }
+    @GetMapping()
+    @RequestMapping("/get/{id}")
+    public ResponseEntity<String> getAssignee(@PathVariable Long id) {
+        Assignee assignee = assigneeService.get(id);
+        return ResponseEntity.status(HttpStatus.FOUND).body(assigneeConverter.toAssigneeResponse(assignee));
+    }
 
-//    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
-//    public void delete(@PathVariable Long id) {
-//        //Also need to check for children records before deleting.
-//        assigneeService.delete(id);
-//    }
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        //Also need to check for children records before deleting.
+        assigneeService.delete(id);
+        return ResponseEntity.status(HttpStatus.FOUND).body("Deleted");
+    }
 }
