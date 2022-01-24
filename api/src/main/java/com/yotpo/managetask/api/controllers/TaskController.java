@@ -13,8 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -30,5 +31,34 @@ public class TaskController {
     public ResponseEntity<String> create(RequestEntity<String> taskRequest) throws JSONException {
         Task newTask = taskService.create(taskConverter.taskFromRequest(taskRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(taskConverter.toTaskResponse(newTask));
+    }
+
+    @GetMapping()
+    @RequestMapping("/getAll")
+    public ResponseEntity<String> getAll() {
+        List<Task> tasks = taskService.getAll();
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTasksResponse(tasks));
+    }
+
+    @GetMapping()
+    @RequestMapping("/get/{id}")
+    public ResponseEntity<String> getTask(@PathVariable Long id) {
+        Task task = taskService.get(id);
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTaskResponse(task));
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        //Also need to check for children records before deleting.
+        taskService.delete(id);
+        return ResponseEntity.status(HttpStatus.FOUND).body("Deleted");
+    }
+
+    @PostMapping()
+    @RequestMapping("/edit/{id}")
+    public ResponseEntity<String> edit(@PathVariable Long id, RequestEntity<String> taskRequest) throws JSONException {
+        Task editedTask = taskConverter.taskFromRequest(taskRequest);
+        taskService.edit(id, editedTask.getAssignee(), editedTask.getDue_date(), editedTask.getTitle(), editedTask.getStatus());
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskConverter.toTaskResponse(editedTask));
     }
 }

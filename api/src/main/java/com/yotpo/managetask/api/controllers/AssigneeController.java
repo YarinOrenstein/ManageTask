@@ -1,7 +1,9 @@
 package com.yotpo.managetask.api.controllers;
 
 import com.yotpo.managetask.api.converters.AssigneeConverter;
+import com.yotpo.managetask.api.converters.TaskConverter;
 import com.yotpo.managetask.core.entities.Assignee;
+import com.yotpo.managetask.core.entities.Task;
 import com.yotpo.managetask.core.services.AssigneeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ public class AssigneeController {
     private AssigneeService assigneeService;
     @Autowired
     private AssigneeConverter assigneeConverter;
+    @Autowired
+    private TaskConverter taskConverter;
 
     @PostMapping()
     @RequestMapping("/add")
@@ -45,10 +49,19 @@ public class AssigneeController {
         return ResponseEntity.status(HttpStatus.FOUND).body(assigneeConverter.toAssigneeResponse(assignee));
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-        //Also need to check for children records before deleting.
-        assigneeService.delete(id);
-        return ResponseEntity.status(HttpStatus.FOUND).body("Deleted");
+//    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+//    public ResponseEntity<String> delete(@PathVariable Long id) {
+//        //Also need to check for children records before deleting.
+//        assigneeService.delete(id);
+//        return ResponseEntity.status(HttpStatus.FOUND).body("Deleted");
+//    }
+
+    //TODO: view all existing tasks per assignee, sortable of filtered by assignee, due date, and status
+    @GetMapping()
+    @RequestMapping("/getTasksByAssigneeId/{id}")
+    public ResponseEntity<String> getAssigneeTasks(@PathVariable Long id) {
+        Assignee assignee = assigneeService.get(id);
+        List<Task> tasks = assignee.getTasks();
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTasksResponse(tasks));
     }
 }
