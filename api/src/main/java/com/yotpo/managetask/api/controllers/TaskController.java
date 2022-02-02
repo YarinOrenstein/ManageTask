@@ -1,64 +1,60 @@
 package com.yotpo.managetask.api.controllers;
 
-import com.yotpo.managetask.api.converters.AssigneeConverter;
 import com.yotpo.managetask.api.converters.TaskConverter;
-import com.yotpo.managetask.core.entities.Assignee;
+import com.yotpo.managetask.api.generated.model.TaskRequest;
+import com.yotpo.managetask.api.generated.model.TaskResponse;
+import com.yotpo.managetask.api.generated.model.TasksResponse;
 import com.yotpo.managetask.core.entities.Task;
-import com.yotpo.managetask.core.services.AssigneeService;
 import com.yotpo.managetask.core.services.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.json.JSONException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import com.yotpo.managetask.api.generated.TasksApi;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/tasks")
-public class TaskController {
+public class TaskController implements TasksApi{
     @Autowired
     private TaskService taskService;
     @Autowired
     private TaskConverter taskConverter;
 
-    @PostMapping()
-    @RequestMapping("/add")
-    public ResponseEntity<String> create(RequestEntity<String> taskRequest) throws JSONException {
-        Task newTask = taskService.create(taskConverter.taskFromRequest(taskRequest));
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskConverter.toTaskResponse(newTask));
+    @Override
+    public ResponseEntity<TaskResponse> create(TaskRequest taskRequest) {
+        Task createdTask = taskService.create(taskConverter.taskFromRequest(taskRequest));
+        TaskResponse taskResponse = taskConverter.toTaskResponse(createdTask);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskResponse);
     }
 
-    @GetMapping()
-    @RequestMapping("/getAll")
-    public ResponseEntity<String> getAll() {
+    @Override
+    public ResponseEntity<TasksResponse> index() {
         List<Task> tasks = taskService.getAll();
         return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTasksResponse(tasks));
     }
 
-    @GetMapping()
-    @RequestMapping("/get/{id}")
-    public ResponseEntity<String> getTask(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<TaskResponse> findById(Long id) {
         Task task = taskService.get(id);
         return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTaskResponse(task));
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<Void> delete(Long id) {
         //Also need to check for children records before deleting.
         taskService.delete(id);
-        return ResponseEntity.status(HttpStatus.FOUND).body("Deleted");
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping()
-    @RequestMapping("/edit/{id}")
-    public ResponseEntity<String> edit(@PathVariable Long id, RequestEntity<String> taskRequest) throws JSONException {
-        Task editedTask = taskConverter.taskFromRequest(taskRequest);
-        taskService.edit(id, editedTask.getAssignee(), editedTask.getDue_date(), editedTask.getTitle(), editedTask.getStatus());
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskConverter.toTaskResponse(editedTask));
+    @Override
+    public ResponseEntity<TaskResponse> update(Long id, TaskRequest taskRequest) {
+        Task task = taskConverter.taskFromRequest(taskRequest);
+        task.setTask_id(id);
+        Task updatedTask = taskService.update(task);
+        TaskResponse taskResponse = taskConverter.toTaskResponse(updatedTask);
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskResponse);
     }
 }

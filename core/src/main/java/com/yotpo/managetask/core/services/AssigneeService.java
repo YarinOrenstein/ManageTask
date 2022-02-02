@@ -22,8 +22,8 @@ public class AssigneeService {
     public Assignee get(Long id) { return assigneeRepository.findById(id)
             .orElseThrow(() -> new AssigneeNotFoundException(id)); }
 
-//    public void delete(Long id) {
-//        //Also need to check for children records before deleting.
-//        assigneeRepository.deleteById(id);
-//    }
+    public void delete(Long id) {
+        //Also need to check for children records before deleting.
+        assigneeRepository.deleteById(id);
+    }
 }

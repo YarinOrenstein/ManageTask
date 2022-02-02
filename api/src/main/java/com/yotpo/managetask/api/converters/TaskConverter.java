@@ -1,21 +1,10 @@
 package com.yotpo.managetask.api.converters;
 
-import com.yotpo.managetask.core.entities.Assignee;
+import com.yotpo.managetask.api.generated.model.*;
 import com.yotpo.managetask.core.entities.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,46 +15,45 @@ public class TaskConverter {
     @Autowired
     private AssigneeConverter assigneeConverter;
 
-    public Task taskFromRequest(RequestEntity<String> request) throws JSONException {
-        JSONObject jsonTaskObject = new JSONObject(request.getBody());
-        return taskFromJSONObject(jsonTaskObject);
-    }
+    public Task taskFromRequest(TaskRequest taskRequest) {
+        TaskRequestTask task = taskRequest.getTask();
 
-    public Task taskFromJSONObject(JSONObject jsonObject) throws JSONException {
         return Task.builder()
-                .title(jsonObject.getString("title"))
-                .status(jsonObject.getString("status"))
-                .assignee(assigneeConverter.assigneeFromJSONObject(jsonObject.getJSONObject("assignee")))
-                .due_date(LocalDate.parse(jsonObject.getString("due_date")))
+                .title(task.getTitle())
+                .status(task.getStatus())
+                .due_date(task.getDueDate())
+                .assignee(assigneeConverter.assigneeFromRequest(task.getAssignee()))
                 .build();
     }
 
-    public List<Task> tasksFromRequest(RequestEntity<String> request) throws JSONException {
-        JSONArray objs = new JSONArray(request.getBody());
-        List<Task> tasks= new ArrayList<>();
-        for (int i = 0; i < objs.length(); i++){
-            tasks.add(taskFromJSONObject(objs.getJSONObject(i)));
-        }
+    public TaskResponse toTaskResponse(Task task){
+        TaskResponseTask taskResponseTask = new TaskResponseTask();
+        taskResponseTask.setTaskId(task.getTask_id());
+        taskResponseTask.setTitle(task.getTitle());
+        taskResponseTask.setAssignee(assigneeConverter.toAssigneeResponse(task.getAssignee()));
+        taskResponseTask.setDueDate(task.getDue_date());
+        taskResponseTask.setStatus(task.getStatus());
+        TaskResponse taskResponse = new TaskResponse();
+        taskResponse.setTask(taskResponseTask);
 
-        return tasks;
+        return taskResponse;
     }
 
-    public String toTaskResponse(Task task){
-        try{
-            return new JSONObject()
-                    .put("task_id", task.getTask_id())
-                    .put("status", task.getStatus())
-                    .put("assignee", assigneeConverter.JSONObjectFromAssignee(task.getAssignee()))
-                    .put("due_date", task.getDue_date())
-                    .toString();
+    public TasksResponse toTasksResponse(List<Task> tasks){
+        List<TaskResponse> taskResponses = tasks.stream().map(this::toTaskResponse).collect(Collectors.toList());
+        TasksResponse response = new TasksResponse();
+        response.setTasks(taskResponses);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return "Failed to create JSON from Task";
-        }
+        return response;
     }
 
-    public String toTasksResponse(List<Task> tasks){
-        return tasks.stream().map(this::toTaskResponse).collect(Collectors.toList()).toString();
-    }
+    //    public List<Task> tasksFromRequest(RequestEntity<String> request) throws JSONException {
+//        JSONArray objs = new JSONArray(request.getBody());
+//        List<Task> tasks= new ArrayList<>();
+//        for (int i = 0; i < objs.length(); i++){
+//            tasks.add(taskFromJSONObject(objs.getJSONObject(i)));
+//        }
+//
+//        return tasks;
+//    }
 }

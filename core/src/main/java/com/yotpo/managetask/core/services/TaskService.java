@@ -1,14 +1,11 @@
 package com.yotpo.managetask.core.services;
 
-import com.yotpo.managetask.core.entities.Assignee;
 import com.yotpo.managetask.core.entities.Task;
 import com.yotpo.managetask.core.exceptions.TaskNotFoundException;
 import com.yotpo.managetask.core.repositories.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -29,12 +26,14 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public void edit(Long id, Assignee newAssignee, LocalDate newDue_date, String newTitle, String newStatus) {
+    public Task update(Task updatedTask) {
+        Long id = updatedTask.getTask_id();
         Task taskToEdit = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
-        taskToEdit.setAssignee(newAssignee);
-        taskToEdit.setDue_date(newDue_date);
-        taskToEdit.setTitle(newTitle);
-        taskToEdit.setStatus(newStatus);
+        taskToEdit.setAssignee(updatedTask.getAssignee());
+        taskToEdit.setDue_date(updatedTask.getDue_date());
+        taskToEdit.setTitle(updatedTask.getTitle());
+        taskToEdit.setStatus(updatedTask.getStatus());
         taskRepository.save(taskToEdit);
+        return taskToEdit;
     }
 }
