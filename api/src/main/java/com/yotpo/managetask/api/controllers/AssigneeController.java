@@ -6,6 +6,7 @@ import com.yotpo.managetask.api.generated.AssigneesApi;
 import com.yotpo.managetask.api.generated.model.AssigneeRequest;
 import com.yotpo.managetask.api.generated.model.AssigneeResponse;
 import com.yotpo.managetask.api.generated.model.AssigneesResponse;
+import com.yotpo.managetask.api.generated.model.TasksResponse;
 import com.yotpo.managetask.core.entities.Assignee;
 import com.yotpo.managetask.core.entities.Task;
 import com.yotpo.managetask.core.services.AssigneeService;
@@ -55,10 +56,9 @@ public class AssigneeController implements AssigneesApi {
     }
 
     //TODO: view all existing tasks per assignee, sortable of filtered by assignee, due date, and status
-//    @Override
-//    public ResponseEntity<String> getAssigneeTasks(@PathVariable Long id) {
-//        Assignee assignee = assigneeService.get(id);
-//        List<Task> tasks = assignee.getTasks();
-//        return ResponseEntity.status(HttpStatus.FOUND).body(taskConverter.toTasksResponse(tasks));
-//    }
+    @Override
+    public ResponseEntity<TasksResponse> getAllTasks(Long assigneeId) {
+        List<Task> assigneeTasks = assigneeService.get(assigneeId).getTasks();
+        return ResponseEntity.ok(taskConverter.toTasksResponse(assigneeTasks));
+    }
 }

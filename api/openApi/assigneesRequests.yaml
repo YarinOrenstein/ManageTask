@@ -109,3 +109,31 @@ assignees:
           application/json:
             schema:
               $ref: 'assigneesComponents.yaml#/AssigneeResponse'
+
+assigneeTasks:
+  get:
+    summary: Get all assignee's tasks by id
+    operationId: getAllTasks
+    tags:
+      - assignees
+    parameters:
+      - in: path
+        name: assignee_id
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: The assignee id
+    responses:
+      200:
+        description: The requested tasks of assignee
+        content:
+          application/json:
+            schema:
+              $ref: 'tasksComponents.yaml#/TasksResponse'
+      400:
+        description: The request contains illegal argument/s
+      401:
+        description: Access token is missing or invalid
+      404:
+        description: Not found

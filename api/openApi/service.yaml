@@ -26,3 +26,5 @@ paths:
     $ref: 'assigneesRequests.yaml#/assignees'
   /assignees/{assignee_id}:
     $ref: 'assigneesRequests.yaml#/assignee'
+  /assigneeTasks/{assignee_id}:
+    $ref: 'assigneesRequests.yaml#/assigneeTasks'

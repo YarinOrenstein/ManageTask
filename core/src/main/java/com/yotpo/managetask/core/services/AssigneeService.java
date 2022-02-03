@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -25,5 +26,20 @@ public class AssigneeService {
     public void delete(Long id) {
         //Also need to check for children records before deleting.
         assigneeRepository.deleteById(id);
+    }
+
+    public Assignee getByFirstNameAndLastName(String firstName, String lastName){
+        List<Assignee> assignees = getAll();
+        synchronized (assignees){
+            Iterator<Assignee> iterator = assignees.iterator();
+            while(iterator.hasNext()){
+                Assignee assignee = (Assignee) iterator.next();
+                if (assignee.getFirst_name().equals(firstName)
+                        && assignee.getLast_name().equals(lastName)) {
+                    return assignee;
+                }
+            }
+            return null;
+        }
     }
 }

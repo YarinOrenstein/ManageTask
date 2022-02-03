@@ -19,11 +19,17 @@ public class AssigneeConverter {
 
     public Assignee assigneeFromRequest(AssigneeRequest assigneeRequest) {
         AssigneeRequestAssignee assignee = assigneeRequest.getAssignee();
-        Assignee createdAssignee = Assignee.builder()
-                .first_name(assignee.getFirstName())
-                .last_name(assignee.getLastName())
-                .build();
-        return assigneeService.create(createdAssignee);
+        Assignee existingAssignee = assigneeService.getByFirstNameAndLastName(assignee.getFirstName(),assignee.getLastName());
+        if (existingAssignee != null){
+            return existingAssignee;
+        }
+        else{
+            Assignee newAssignee = Assignee.builder()
+                    .first_name(assignee.getFirstName())
+                    .last_name(assignee.getLastName())
+                    .build();
+            return assigneeService.create(newAssignee);
+        }
     }
 
     public AssigneeResponse toAssigneeResponse(Assignee assignee) {
